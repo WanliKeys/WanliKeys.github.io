@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="李万里 Wanli Li — 计算机科学学生,关注人机交互与开源生态。" />
+  <meta name="theme-color" content="#FAF7F0" />
+  <title>李万里 · Wanli Li</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =====  Reset  ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body, h1, h2, h3, h4, p, ul, ol, li, figure, blockquote, pre {
+      margin: 0; padding: 0;
+    }
+    ul, ol { list-style: none; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+    :focus-visible {
+      outline: 2.5px solid var(--ink);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    /* =====  Tokens  ===== */
+    :root {
+      /* 画布 */
+      --paper:     #FAF7F0;
+      --paper-2:   #F2EDE2;
+      --paper-3:   #E8E1D2;
+      --white:     #FFFFFF;
+
+      /* 文字 */
+      --ink:       #1A1A1F;
+      --ink-2:     #5A5A65;
+      --ink-3:     #9A9AA0;
+
+      /* 强调色(6 色) */
+      --coral:     #FF6B4A;
+      --mint:      #4ECDC4;
+      --sky:       #5B8DEF;
+      --lemon:     #FFD93D;
+      --lavender:  #B084F5;
+      --peach:     #FF85B3;
+
+      --line:      rgba(26, 26, 31, 0.10);
+      --line-2:    rgba(26, 26, 31, 0.20);
+
+      /* 字体 */
+      --font-display: "Bricolage Grotesque", "Noto Sans SC", system-ui, sans-serif;
+      --font-body:    "Inter Tight", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+      --font-cn:      "Noto Sans SC", "Bricolage Grotesque", sans-serif;
+
+      --container: 1200px;
+      --pad-x: clamp(24px, 5vw, 48px);
+      --section-gap: clamp(96px, 14vh, 160px);
+
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    /* =====  Base  ===== */
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+      background: var(--paper);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      position: relative;
+      letter-spacing: -0.005em;
+    }
+
+    /* 纸面噪点 */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.04;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    /* 手绘装饰元素 */
+    .deco {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .deco--dots {
+      top: 88px;
+      right: 4vw;
+      width: 110px;
+      height: 110px;
+      opacity: 0.7;
+    }
+    .deco--tri {
+      bottom: 60px;
+      left: 4vw;
+      width: 90px;
+      height: 90px;
+      opacity: 0.55;
+    }
+    .deco--scribble {
+      top: 38%;
+      right: 5vw;
+      width: 70px;
+      height: 70px;
+      opacity: 0.45;
+    }
+    @media (max-width: 900px) {
+      .deco--dots, .deco--scribble { display: none; }
+      .deco--tri { width: 60px; height: 60px; bottom: 30px; }
+    }
+
+    main, header, footer { position: relative; z-index: 1; }
+
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding-left: var(--pad-x);
+      padding-right: var(--pad-x);
+    }
+
+    /* =====  Header  ===== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      background: rgba(250, 247, 240, 0.78);
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .logo-badge {
+      display: inline-grid;
+      place-items: center;
+      width: 30px; height: 30px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 7px;
+      transform: rotate(-3deg);
+    }
+    .logo-text {
+      color: var(--ink);
+    }
+    .nav {
+      display: flex;
+      gap: 2px;
+    }
+    .nav a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: color 0.2s var(--ease), background 0.2s var(--ease);
+    }
+    .nav a:hover, .nav a.is-active {
+      color: var(--ink);
+      background: var(--paper-2);
+    }
+    .nav .nav-num {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--coral);
+      margin-right: 5px;
+      font-weight: 600;
+    }
+
+    /* =====  Hero  ===== */
+    .hero {
+      padding-top: clamp(56px, 10vh, 100px);
+      padding-bottom: clamp(40px, 8vh, 80px);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 48px;
+      align-items: end;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--ink-2);
+      margin-bottom: 24px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .hero-eyebrow .pill {
+      display: inline-grid;
+      place-items: center;
+      padding: 4px 10px;
+      background: var(--mint);
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transform: rotate(-1.5deg);
+    }
+
+    .hero h1 {
+      font-family: var(--font-cn);
+      font-weight: 700;
+      font-size: clamp(56px, 9vw, 128px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .hero h1 .en {
+      display: block;
+      font-family: var(--font-display);
+      font-style: normal;
+      font-weight: 500;
+      font-size: clamp(26px, 4.2vw, 52px);
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-top: 2px;
+    }
+    .hero h1 .en .accent {
+      color: var(--coral);
+    }
+
+    .hero-role {
+      font-family: var(--font-display);
+      font-size: clamp(17px, 2vw, 22px);
+      font-weight: 500;
+      color: var(--ink-2);
+      margin-bottom: 28px;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hero-role .chip {
+      display: inline-grid;
+      place-items: center;
+      padding: 3px 10px;
+      background: var(--lemon);
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      transform: rotate(1.5deg);
+    }
+    .hero-role .sep { color: var(--ink-3); margin: 0 4px; }
+
+    .hero-tagline {
+      max-width: 540px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--ink-2);
+    }
+
+    /* 状态便签(右侧) */
+    .status-card {
+      position: relative;
+      padding: 22px;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      border-radius: 4px 18px 6px 20px;
+      box-shadow: 6px 6px 0 var(--ink);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-2);
+      display: grid;
+      gap: 10px;
+      transform: rotate(1deg);
+    }
+    .status-card::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      left: 18px;
+      width: 56px;
+      height: 22px;
+      background: rgba(255, 217, 61, 0.7);
+      border: 1.5px solid var(--ink);
+      transform: rotate(-6deg);
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-key { color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+    .status-val { color: var(--ink); font-weight: 500; }
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--mint);
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1.5px solid var(--ink);
+    }
+    .status-divider {
+      height: 1px;
+      background: var(--line);
+      border-top: 1px dashed var(--line-2);
+    }
+
+    /* =====  Section scaffolding  ===== */
+    section {
+      padding-top: var(--section-gap);
+      padding-bottom: var(--section-gap);
+    }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 56px;
+    }
+    .sec-num {
+      display: inline-grid;
+      place-items: center;
+      width: 38px; height: 38px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      letter-spacing: 0.02em;
+    }
+    .sec-title {
+      font-family: var(--font-cn);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .sec-title-en {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(15px, 1.4vw, 18px);
+      color: var(--ink-3);
+      margin-left: 6px;
+      letter-spacing: 0;
+    }
+    .sec-bar {
+      flex: 1;
+      height: 1.5px;
+      background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 12px);
+      opacity: 0.4;
+    }
+
+    /* =====  About  ===== */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 64px;
+      align-items: start;
+    }
+    .about-meta {
+      display: grid;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+    .about-meta-row {
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+    }
+    .about-meta-row::before {
+      content: "";
+      flex: 0 0 8px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--coral);
+      align-self: center;
+    }
+    .about-meta-row:nth-child(2)::before { background: var(--mint); }
+    .about-meta-row:nth-child(3)::before { background: var(--sky); }
+    .about-meta-row:nth-child(4)::before { background: var(--lavender); }
+    .about-meta-row:nth-child(5)::before { background: var(--lemon); }
+    .about-meta-row dt { color: var(--ink-3); min-width: 80px; }
+    .about-meta-row dd { color: var(--ink); }
+
+    .about-bio p {
+      font-size: 16.5px;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+    .about-bio p:last-child { margin-bottom: 0; }
+    .about-bio .lang {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      padding: 2px 8px;
+      background: var(--lemon);
+      border: 1.5px solid var(--ink);
+      border-radius: 4px;
+      margin-right: 8px;
+      font-weight: 600;
+    }
+    .about-bio p:nth-child(2) .lang { background: var(--mint); }
+
+    /* =====  Interests  ===== */
+    .interests-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .sticker {
+      position: relative;
+      padding: 26px 22px 22px;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      border-radius: 18px 24px 20px 28px;
+      box-shadow: 5px 5px 0 var(--ink);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .sticker:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0 var(--ink);
+    }
+    .sticker-tag {
+      position: absolute;
+      top: -10px;
+      left: 18px;
+      padding: 3px 10px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+      border-radius: 4px;
+      transform: rotate(-2deg);
+    }
+    .sticker-icon {
+      width: 44px; height: 44px;
+      display: grid; place-items: center;
+      border: 1.5px solid var(--ink);
+      border-radius: 12px;
+      margin-bottom: 18px;
+      background: var(--paper-2);
+    }
+    .sticker h3 {
+      font-family: var(--font-cn);
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .sticker h3 .en {
+      display: block;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--ink-2);
+      margin-top: 2px;
+      letter-spacing: 0;
+    }
+    .sticker p {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--ink-2);
+    }
+
+    /* 6 种颜色变体 */
+    .sticker--coral   .sticker-tag   { background: var(--coral); }
+    .sticker--coral   .sticker-icon  { background: rgba(255, 107, 74, 0.18); color: var(--coral); }
+    .sticker--mint    .sticker-tag   { background: var(--mint); }
+    .sticker--mint    .sticker-icon  { background: rgba(78, 205, 196, 0.22); color: #1F8C86; }
+    .sticker--sky     .sticker-tag   { background: var(--sky); color: var(--white); }
+    .sticker--sky     .sticker-icon  { background: rgba(91, 141, 239, 0.18); color: var(--sky); }
+    .sticker--lemon   .sticker-tag   { background: var(--lemon); }
+    .sticker--lemon   .sticker-icon  { background: rgba(255, 217, 61, 0.32); color: #B89400; }
+    .sticker--lavender .sticker-tag  { background: var(--lavender); color: var(--white); }
+    .sticker--lavender .sticker-icon { background: rgba(176, 132, 245, 0.20); color: var(--lavender); }
+    .sticker--peach   .sticker-tag   { background: var(--peach); }
+    .sticker--peach   .sticker-icon  { background: rgba(255, 133, 179, 0.22); color: #C04A78; }
+
+    /* 错落旋转,营造便签感 */
+    .sticker:nth-child(1) { transform: rotate(-0.6deg); }
+    .sticker:nth-child(2) { transform: rotate(0.4deg); }
+    .sticker:nth-child(3) { transform: rotate(-0.3deg); }
+    .sticker:nth-child(4) { transform: rotate(0.5deg); }
+    .sticker:nth-child(5) { transform: rotate(-0.5deg); }
+    .sticker:nth-child(6) { transform: rotate(0.3deg); }
+    .sticker:hover { transform: translate(-2px, -2px) rotate(0deg); }
+
+    /* =====  Projects  ===== */
+    .projects {
+      display: grid;
+      gap: 24px;
+    }
+    .project {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      padding: 32px 32px 28px;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 6px 6px 0 var(--ink);
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    }
+    .project:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 9px 9px 0 var(--ink);
+    }
+    .project-corner {
+      position: absolute;
+      top: -10px;
+      right: 24px;
+      width: 64px;
+      height: 22px;
+      background: var(--coral);
+      border: 1.5px solid var(--ink);
+      border-radius: 3px;
+      transform: rotate(3deg);
+    }
+    .project:nth-child(2) .project-corner { background: var(--mint); right: auto; left: 24px; transform: rotate(-3deg); }
+    .project:nth-child(3) .project-corner { background: var(--sky); color: var(--white); }
+    .project-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .project-title {
+      font-family: var(--font-cn);
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .project-title .en {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--ink-2);
+      margin-left: 6px;
+      letter-spacing: 0;
+    }
+    .project-year {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-3);
+      padding: 3px 8px;
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+    }
+    .project-desc {
+      color: var(--ink-2);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 720px;
+    }
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag-outline {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 4px 10px;
+      border: 1px solid var(--ink);
+      border-radius: 4px;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    .project-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .project-links a {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1.5px solid var(--ink);
+      border-radius: 4px;
+      background: var(--paper-2);
+      transition: background 0.2s var(--ease), color 0.2s var(--ease);
+    }
+    .project-links a:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .project-links a svg { width: 12px; height: 12px; }
+
+    /* =====  Contact  ===== */
+    .contact-lede {
+      max-width: 640px;
+      font-size: 16.5px;
+      line-height: 1.75;
+      color: var(--ink-2);
+      margin-bottom: 32px;
+    }
+    .contact-email {
+      display: inline-block;
+      font-family: var(--font-cn);
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 32px;
+      padding: 4px 0;
+      border-bottom: 3px solid var(--ink);
+      transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .contact-email:hover {
+      color: var(--coral);
+      border-color: var(--coral);
+    }
+    .contact-email .en {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-style: normal;
+      font-size: 0.42em;
+      color: var(--ink-3);
+      display: block;
+      margin-top: 6px;
+      letter-spacing: 0;
+    }
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .social {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--white);
+      box-shadow: 3px 3px 0 var(--ink);
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .social:hover {
+      transform: translate(-1px, -1px) rotate(1.5deg);
+      box-shadow: 4px 4px 0 var(--coral);
+    }
+    .social--github:hover { box-shadow: 4px 4px 0 var(--ink); }
+    .social--linkedin:hover { box-shadow: 4px 4px 0 var(--sky); }
+    .social--twitter:hover  { box-shadow: 4px 4px 0 var(--ink); }
+    .social--rss:hover      { box-shadow: 4px 4px 0 var(--lemon); }
+    .social svg { width: 14px; height: 14px; }
+
+    /* =====  Footer  ===== */
+    .site-footer {
+      border-top: 1.5px solid var(--ink);
+      padding: 28px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-2);
+      background: var(--paper-2);
+    }
+    .site-footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .site-footer .heart { color: var(--coral); }
+
+    /* =====  Reveal animation  ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal[data-delay="1"] { transition-delay: 0.08s; }
+    .reveal[data-delay="2"] { transition-delay: 0.16s; }
+    .reveal[data-delay="3"] { transition-delay: 0.24s; }
+    .reveal[data-delay="4"] { transition-delay: 0.32s; }
+
+    .hero .reveal { transform: translateY(20px); }
+
+    /* =====  Responsive  ===== */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .status-card { transform: rotate(0deg); }
+      .about-grid { grid-template-columns: 1fr; gap: 32px; }
+      .interests-grid { grid-template-columns: repeat(2, 1fr); }
+      .project { padding: 26px 22px 22px; }
+    }
+    @media (max-width: 640px) {
+      .nav a { padding: 8px 8px; font-size: 12.5px; }
+      .nav .nav-label-en { display: none; }
+      .interests-grid { grid-template-columns: 1fr; }
+      .sticker { transform: none !important; }
+      .sticker:hover { transform: translate(-2px, -2px) !important; }
+      .project:hover { transform: translate(-2px, -2px); }
+      .site-footer .container { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: clamp(48px, 14vw, 80px); }
+      .sec-head { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 手绘装饰 SVG -->
+  <svg class="deco deco--dots" viewBox="0 0 110 110" aria-hidden="true">
+    <g fill="#FF6B4A">
+      <circle cx="14" cy="14" r="4"/><circle cx="38" cy="14" r="4"/><circle cx="62" cy="14" r="4"/><circle cx="86" cy="14" r="4"/>
+      <circle cx="14" cy="38" r="4"/><circle cx="38" cy="38" r="4"/><circle cx="62" cy="38" r="4"/><circle cx="86" cy="38" r="4"/>
+      <circle cx="14" cy="62" r="4"/><circle cx="38" cy="62" r="4"/><circle cx="62" cy="62" r="4"/><circle cx="86" cy="62" r="4"/>
+      <circle cx="14" cy="86" r="4"/><circle cx="38" cy="86" r="4"/><circle cx="62" cy="86" r="4"/><circle cx="86" cy="86" r="4"/>
+    </g>
+  </svg>
+
+  <svg class="deco deco--tri" viewBox="0 0 90 90" aria-hidden="true">
+    <polygon points="45,8 82,76 8,76" fill="none" stroke="#1A1A1F" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="45,22 70,66 20,66" fill="#FFD93D" stroke="#1A1A1F" stroke-width="2" stroke-linejoin="round"/>
+  </svg>
+
+  <svg class="deco deco--scribble" viewBox="0 0 70 70" aria-hidden="true">
+    <path d="M 10 35 Q 25 5, 40 35 T 60 35" fill="none" stroke="#4ECDC4" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="60" cy="35" r="4" fill="#4ECDC4"/>
+  </svg>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="#top" class="logo" aria-label="返回首页">
+        <span class="logo-badge" aria-hidden="true">W</span>
+        <span class="logo-text">wanli.dev</span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="#about"><span class="nav-num">01</span><span class="nav-label-en">About</span></a>
+        <a href="#interests"><span class="nav-num">02</span><span class="nav-label-en">Interests</span></a>
+        <a href="#projects"><span class="nav-num">03</span><span class="nav-label-en">Projects</span></a>
+        <a href="#contact"><span class="nav-num">04</span><span class="nav-label-en">Contact</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ======  HERO  ====== -->
+    <section class="hero container" aria-labelledby="hero-name">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-eyebrow reveal">
+            <span class="pill">Open to work</span>
+            <span>2026 Spring</span>
+          </div>
+
+          <h1 id="hero-name">
+            <span class="reveal" data-delay="1">李万里</span>
+            <span class="en reveal" data-delay="2">Wanli<span class="accent">.</span>Li</span>
+          </h1>
+
+          <p class="hero-role reveal" data-delay="3">
+            <span class="chip">CS Junior</span>
+            <span>计算机科学 · 大三</span>
+            <span class="sep">/</span>
+            <span>Computer Science</span>
+          </p>
+
+          <p class="hero-tagline reveal" data-delay="4">
+            Building thoughtful software, one commit at a time.
+            热衷于用代码解决真实问题,关注人机交互与开源生态。
+          </p>
+        </div>
+
+        <aside class="status-card reveal" data-delay="3" aria-label="状态信息">
+          <div class="status-row">
+            <span class="status-key">Location</span>
+            <span class="status-val">上海 · Shanghai</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-row">
+            <span class="status-key">Focus</span>
+            <span class="status-val">HCI · OSS</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-row">
+            <span class="status-key">Status</span>
+            <span class="status-val"><span class="status-dot" aria-hidden="true"></span>Available</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-row">
+            <span class="status-key">Local time</span>
+            <span class="status-val" id="localTime">--:--</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ======  ABOUT  ====== -->
+    <section id="about" class="container" aria-labelledby="about-title">
+      <div class="sec-head reveal">
+        <span class="sec-num" aria-hidden="true">01</span>
+        <h2 class="sec-title" id="about-title">关于我<span class="sec-title-en">About</span></h2>
+        <span class="sec-bar" aria-hidden="true"></span>
+      </div>
+
+      <div class="about-grid">
+        <dl class="about-meta reveal" data-delay="1">
+          <div class="about-meta-row">
+            <dt>学校</dt>
+            <dd>某某大学 · University</dd>
+          </div>
+          <div class="about-meta-row">
+            <dt>专业</dt>
+            <dd>计算机科学与技术</dd>
+          </div>
+          <div class="about-meta-row">
+            <dt>年级</dt>
+            <dd>2023 — 2027(预计)</dd>
+          </div>
+          <div class="about-meta-row">
+            <dt>语言</dt>
+            <dd>中文(母语) · English(Fluent)</dd>
+          </div>
+          <div class="about-meta-row">
+            <dt>方向</dt>
+            <dd>人机交互 / 前端工程</dd>
+          </div>
+        </dl>
+
+        <div class="about-bio">
+          <p class="reveal" data-delay="1">
+            <span class="lang">EN</span>
+            I'm a junior majoring in Computer Science, curious about the seam where humans and machines meet — interface design, open-source tooling, and the small details that make software feel alive.
+          </p>
+          <p class="reveal" data-delay="2">
+            <span class="lang">中</span>
+            计算机科学大三在读。关注人机交互、开源生态与可读代码。闲时喜欢读论文、写博客、跑长距离,相信慢一点的东西往往走得更远。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======  INTERESTS  ====== -->
+    <section id="interests" class="container" aria-labelledby="interests-title">
+      <div class="sec-head reveal">
+        <span class="sec-num" aria-hidden="true">02</span>
+        <h2 class="sec-title" id="interests-title">兴趣方向<span class="sec-title-en">Interests</span></h2>
+        <span class="sec-bar" aria-hidden="true"></span>
+      </div>
+
+      <div class="interests-grid">
+        <article class="sticker sticker--coral reveal" data-delay="1">
+          <span class="sticker-tag">/ 01</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7h18M3 12h18M3 17h12"/>
+            </svg>
+          </div>
+          <h3>人机交互<span class="en">HCI</span></h3>
+          <p>好的界面是看不见的。研究交互范式、可访问性与微动效。</p>
+        </article>
+
+        <article class="sticker sticker--mint reveal" data-delay="2">
+          <span class="sticker-tag">/ 02</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3M15 22v-4a3.4 3.4 0 0 0-.94-2.61C17.36 14.97 21 13.78 21 8c0-.61-.13-1.2-.36-1.74A3.6 3.6 0 0 0 20.4 4.2s-1.16-.32-3.81 1.4a12.9 12.9 0 0 0-6.79 0C7.16 3.88 6 4.2 6 4.2a3.6 3.6 0 0 0-.24 2.06A5.5 5.5 0 0 0 5.4 8c0 5.76 3.63 6.96 7.32 7.38A3.4 3.4 0 0 0 11.8 18v4"/>
+            </svg>
+          </div>
+          <h3>开源贡献<span class="en">Open Source</span></h3>
+          <p>在 GitHub 上提交 PR,维护几个小工具。相信分享让代码更好。</p>
+        </article>
+
+        <article class="sticker sticker--sky reveal" data-delay="3">
+          <span class="sticker-tag">/ 03</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="2"/><path d="M8 22l4-9 4 9M12 13V8"/>
+            </svg>
+          </div>
+          <h3>长跑<span class="en">Running</span></h3>
+          <p>晨跑 5 公里,周末拉一次长距离。是最好的冥想方式。</p>
+        </article>
+
+        <article class="sticker sticker--lemon reveal" data-delay="1">
+          <span class="sticker-tag">/ 04</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="15" cy="11" r="1"/><circle cx="17" cy="13" r="1"/>
+            </svg>
+          </div>
+          <h3>独立游戏<span class="en">Indie Games</span></h3>
+          <p>偏爱叙事驱动与极简美术。正在尝试用 Godot 做一个小项目。</p>
+        </article>
+
+        <article class="sticker sticker--lavender reveal" data-delay="2">
+          <span class="sticker-tag">/ 05</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+            </svg>
+          </div>
+          <h3>字体设计<span class="en">Type Design</span></h3>
+          <p>关注中英文字体的字面、节奏与反差。Glyphs 中挖过几次坑。</p>
+        </article>
+
+        <article class="sticker sticker--peach reveal" data-delay="3">
+          <span class="sticker-tag">/ 06</span>
+          <div class="sticker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/>
+            </svg>
+          </div>
+          <h3>天文摄影<span class="en">Astro</span></h3>
+          <p>在城市边缘的夜里架三脚架,拍银河与深空天体。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ======  PROJECTS  ====== -->
+    <section id="projects" class="container" aria-labelledby="projects-title">
+      <div class="sec-head reveal">
+        <span class="sec-num" aria-hidden="true">03</span>
+        <h2 class="sec-title" id="projects-title">项目经历<span class="sec-title-en">Projects</span></h2>
+        <span class="sec-bar" aria-hidden="true"></span>
+      </div>
+
+      <div class="projects">
+        <article class="project reveal">
+          <span class="project-corner" aria-hidden="true"></span>
+          <div class="project-head">
+            <h3 class="project-title">Lumen<span class="en">— a minimal markdown notebook</span></h3>
+            <span class="project-year">2025</span>
+          </div>
+          <p class="project-desc">
+            极简的 Markdown 笔记本,支持双向链接与本地优先存储。
+            灵感来自 Obsidian,但更克制,只保留写作本身。
+          </p>
+          <div class="project-meta">
+            <span class="tag-outline">TypeScript</span>
+            <span class="tag-outline">Tauri</span>
+            <span class="tag-outline">CRDT</span>
+            <span class="tag-outline">Rust</span>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/wanli/lumen" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+              Source
+            </a>
+            <a href="https://lumen.wanli.dev" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>
+              Live
+            </a>
+          </div>
+        </article>
+
+        <article class="project reveal" data-delay="1">
+          <span class="project-corner" aria-hidden="true"></span>
+          <div class="project-head">
+            <h3 class="project-title">Pulse<span class="en">— campus events, recommified</span></h3>
+            <span class="project-year">2024</span>
+          </div>
+          <p class="project-desc">
+            校园活动聚合与推荐系统。爬取、分类、打分,
+            并基于你关注的社团推送个性化日程。后端 Go,前端 React。
+          </p>
+          <div class="project-meta">
+            <span class="tag-outline">Go</span>
+            <span class="tag-outline">React</span>
+            <span class="tag-outline">PostgreSQL</span>
+            <span class="tag-outline">Embeddings</span>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/wanli/pulse" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+              Source
+            </a>
+            <a href="https://pulse.wanli.dev" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>
+              Live
+            </a>
+          </div>
+        </article>
+
+        <article class="project reveal" data-delay="2">
+          <span class="project-corner" aria-hidden="true"></span>
+          <div class="project-head">
+            <h3 class="project-title">Trace<span class="en">— git, in your terminal</span></h3>
+            <span class="project-year">2024</span>
+          </div>
+          <p class="project-desc">
+            终端风格的 Git 可视化工具:用 TUI 重现提交树、分支与 diff。
+            学习 Rust 的练手项目,目前 800+ stars。
+          </p>
+          <div class="project-meta">
+            <span class="tag-outline">Rust</span>
+            <span class="tag-outline">Ratatui</span>
+            <span class="tag-outline">Git2</span>
+          </div>
+          <div class="project-links">
+            <a href="https://github.com/wanli/trace" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+              Source
+            </a>
+            <a href="https://crates.io/crates/trace" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>
+              Crate
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ======  CONTACT  ====== -->
+    <section id="contact" class="container" aria-labelledby="contact-title">
+      <div class="sec-head reveal">
+        <span class="sec-num" aria-hidden="true">04</span>
+        <h2 class="sec-title" id="contact-title">联系我<span class="sec-title-en">Contact</span></h2>
+        <span class="sec-bar" aria-hidden="true"></span>
+      </div>
+
+      <p class="contact-lede reveal" data-delay="1">
+        想聊开源合作、实习机会、或者只是打个招呼?
+        欢迎随时来邮,通常 24 小时内回复。
+      </p>
+
+      <a class="contact-email reveal" data-delay="2" href="mailto:hello@wanli.dev">
+        hello@wanli.dev
+        <span class="en">drop a line, anytime →</span>
+      </a>
+
+      <div class="contact-links reveal" data-delay="3">
+        <a class="social social--github" href="https://github.com/wanli" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+          GitHub
+        </a>
+        <a class="social social--linkedin" href="https://linkedin.com/in/wanli" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5V9h3v10zM6.5 7.7A1.7 1.7 0 1 1 8.2 6a1.7 1.7 0 0 1-1.7 1.7zM19 19h-3v-5.6c0-1.3-.5-2-1.5-2s-1.5.7-1.5 2V19h-3V9h3v1.4a3 3 0 0 1 2.7-1.5c2 0 3.3 1.3 3.3 4V19z"/></svg>
+          LinkedIn
+        </a>
+        <a class="social social--twitter" href="https://twitter.com/wanli" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </a>
+        <a class="social social--rss" href="/feed.xml" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor"/></svg>
+          RSS
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>© 2026 Wanli Li. All rights reserved.</span>
+      <span>Built with <span class="heart">♥</span> &amp; vanilla HTML.</span>
+    </div>
+  </footer>
+
+  <script>
+    // =====  Reveal on scroll  =====
+    (function () {
+      const items = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        items.forEach(el => el.classList.add('is-visible'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      items.forEach(el => io.observe(el));
+    })();
+
+    // =====  Active nav highlight  =====
+    (function () {
+      const links = document.querySelectorAll('.nav a[href^="#"]');
+      const map = new Map();
+      links.forEach(l => {
+        const id = l.getAttribute('href').slice(1);
+        const sec = document.getElementById(id);
+        if (sec) map.set(sec, l);
+      });
+      const sections = Array.from(map.keys());
+      if (!sections.length) return;
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const link = map.get(entry.target);
+          if (!link) return;
+          if (entry.isIntersecting) {
+            links.forEach(l => l.classList.remove('is-active'));
+            link.classList.add('is-active');
+          }
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      sections.forEach(s => io.observe(s));
+    })();
+
+    // =====  Local time  =====
+    (function () {
+      const el = document.getElementById('localTime');
+      if (!el) return;
+      const fmt = () => {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        el.textContent = `${hh}:${mm} GMT+8`;
+      };
+      fmt();
+      setInterval(fmt, 30 * 1000);
+    })();
+
+    // =====  Smooth scroll  =====
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        if (id.length < 2) return;
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      });
+    });
+  </script>
+</body>
+</html>
